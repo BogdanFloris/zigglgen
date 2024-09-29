@@ -622,10 +622,10 @@ fn renderCode(
         \\    pub fn init(procs: *ProcTable, loader: anytype) bool {
         \\        @setEvalBranchQuota(1_000_000);
         \\        var success: u1 = 1;
-        \\        inline for (@typeInfo(ProcTable).Struct.fields) |field_info| {
+        \\        inline for (@typeInfo(ProcTable).@"struct".fields) |field_info| {
         \\            switch (@typeInfo(field_info.type)) {
-        \\                .Pointer => |ptr_info| switch (@typeInfo(ptr_info.child)) {
-        \\                    .Fn => {
+        \\                .pointer => |ptr_info| switch (@typeInfo(ptr_info.child)) {
+        \\                    .@"fn" => {
         \\                        success &= @intFromBool(procs.initCommand(loader, field_info.name));
         \\                    },
         \\                    else => comptime unreachable,
@@ -634,16 +634,16 @@ fn renderCode(
     );
     if (any_extensions) {
         try writer.writeAll(
-            \\                .Optional => |opt_info| switch (@typeInfo(opt_info.child)) {
-            \\                    .Pointer => |ptr_info| switch (@typeInfo(ptr_info.child)) {
-            \\                        .Fn => {
+            \\                .optional => |opt_info| switch (@typeInfo(opt_info.child)) {
+            \\                    .pointer => |ptr_info| switch (@typeInfo(ptr_info.child)) {
+            \\                        .@"fn" => {
             \\                            @field(procs, field_info.name) = null;
             \\                        },
             \\                        else => comptime unreachable,
             \\                    },
             \\                    else => comptime unreachable,
             \\                },
-            \\                .Bool => {
+            \\                .bool => {
             \\                    @field(procs, field_info.name) = false;
             \\                },
             \\
@@ -703,15 +703,15 @@ fn renderCode(
         \\            @field(procs, name) = @ptrCast(proc);
         \\            return true;
         \\        } else {
-        \\            return @typeInfo(@TypeOf(@field(procs, name))) == .Optional;
+        \\            return @typeInfo(@TypeOf(@field(procs, name))) == .optional;
         \\        }
         \\    }
         \\
         \\    fn getProcAddress(loader: anytype, prefixed_name: [:0]const u8) ?PROC {
         \\        const loader_info = @typeInfo(@TypeOf(loader));
         \\        const loader_is_fn =
-        \\            loader_info == .Fn or
-        \\            loader_info == .Pointer and @typeInfo(loader_info.Pointer.child) == .Fn;
+        \\            loader_info == .@"fn" or
+        \\            loader_info == .pointer and @typeInfo(loader_info.pointer.child) == .@"fn";
         \\        if (loader_is_fn) {
         \\            return @as(?PROC, loader(@as([*:0]const u8, prefixed_name)));
         \\        } else {
